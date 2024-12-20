@@ -64,5 +64,12 @@ router.get('/profile', passportCall('jwt'), authorization('seller'), (req, res) 
 
 
 
+router.get('/current', passportCall('jwt'), (req, res) => {
+    if(!req.user) res.status(500).json({ message: "No hay usuario registrado" })
+    res.status(200).json(req.user)
+})
+
+
+
 
 export default router;
