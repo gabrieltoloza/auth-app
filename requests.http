@@ -1,0 +1,32 @@
+
+# Endpoint   " /api/products/"
+
+### Ruta que da acceso a la home page de la app. Accesible para todos, por ejemplo un visitante anonimo. Devuelve un mensaje de bienvenida
+GET http://127.0.0.1:8080/api/products
+
+
+### Ruta que muetra los productos, solo para autenticados con role "seller"
+GET http://127.0.0.1:8080/api/products/viewProducts
+
+
+
+### Ruta que solo puede consumir el admin, es para crear un nuevo producto, el "admin"
+POST http://127.0.0.1:8080/api/products/newProduct
+
+
+
+
+
+# Endpoint   " /api/sessions"
+
+
+### Ruta para registrar un nuevo usuario.
+POST http://127.0.0.1:8080/api/sessions/register
+
+
+### Ruta para loguearse con un usuario previamente registrado
+POST http://127.0.0.1:8080/api/sessions/login
+
+
+### Ruta para desloguearse de la session y eliminar el jwt
+GET http://127.0.0.1:8080/api/sessions/logout
