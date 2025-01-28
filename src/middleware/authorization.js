@@ -1,13 +1,20 @@
 export const authorization = (role) => {
-
     return async (req, res, next) => {
-        
-        if(!req.user) return res.status(401).json({ message: "Unauthorized"})
-        for(const roleUser of req.user.role) {
-            if(roleUser === role) {
-                return next()
-            }
+        if (!req.user) {
+            // Le dejo la validacion al controlador, el passportconfig me setea la info que debe llegar
+            return res.status(401).json({ status: false, message: "No autorizado" });
         }
-        return res.status(403).json({ message: 'No Permissions'})
-    }
-}
+
+        const userRole = req.user.role;
+        const middlewareRoles = Array.isArray(role) ? role : [role];
+
+        const hasRole = middlewareRoles.includes(userRole);
+
+        if (hasRole) {
+            return next();
+        }
+
+        return res.status(403).json({ status: false, message: "No tiene permisos" });
+    };
+
+};

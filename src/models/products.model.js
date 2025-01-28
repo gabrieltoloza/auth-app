@@ -4,23 +4,21 @@ import { config } from "../utils/utilities.js";
 mongoose.pluralize(null);
 
 
-const collection = config.MONGO_CARTS_COLECTION;
+const collectionSchema = config.MONGO_PRODUCT_COLECTION;
 
 
-const schema = new mongoose.Schema({
+const schemaProduct = new mongoose.Schema({
     title: { type: String, required: true, unique: true },
-    description: { type: String, required: true },
-    code: { type: String, required: true, unique: true },
-    price: { type: Number, required: true },
-    stock: { type: Number, required: true },
-    category: { type: String , required: true },
-    thumbnails: { type: [{ type: String }], },
-    status: { type: Boolean, required: true }
+    description: { type: String, required: true, trim: true},
+    price: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: true, min: 0},
+    category: { type: String , required: true , trim: true},
+    createdAt: { type: String, default: new Date(Date.now()).toLocaleString() }
 })
 
 
 
-const model = mongoose.model(collection, schema)
+const model = mongoose.model(collectionSchema, schemaProduct)
 
 
 export default model;

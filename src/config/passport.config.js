@@ -2,8 +2,10 @@ import passport from "passport";
 import local from 'passport-local';
 import jwt,{ ExtractJwt } from 'passport-jwt';
 import { createHash, isValidHash } from "../utils/funcionesHash.js";
-import usersModel from "../models/users.model.js";
 import { config } from "../utils/utilities.js";
+import { authService } from "../services/auth/index.js";
+
+
 
 
 const LocalStrategy = local.Strategy;
@@ -28,9 +30,10 @@ const initializePassport = () => {
         },
         async(jwt_payload, done) => {
             try {
+                
                 return done(null, jwt_payload.user);
             } catch (error) {
-                return done(error);                
+                return done({error});                
             }
         }
     ))
@@ -41,56 +44,71 @@ const initializePassport = () => {
 
         {
             passReqToCallback: true, // Permite que el objeto req sea pasado a la función de verificación
-            usernameField: 'seller_name'   // Especifica que el campo 'email' contiene el nombre de usuario
+            usernameField: 'email'   // Especifica que el campo 'email' contiene el nombre de usuario
         },
         async(req, username, password, done ) => {
 
             
-            const { code_list, email, order, role, bearer_token } = req.body;
+            const { firstName, lastName, role = 'buyer' } = req.body; // <-- Si no se pasa este parametro por defecto sera "buyer"
 
+            if (!firstName || !lastName || !username || !password) {
+                return done(null, false, { message: "Faltan parametros en la peticion" });
+            }
+
+            if (role !== "buyer" && role !== 'admin') {
+                return done(null, false, { message: " Rol invalido, debe ser 'buyer' o 'admin' " });
+            }
 
             try {
+
+                const userExists = await authService.getUserByEmailAndRole(username, role)
                 
-                
-                // Verificamos si el usuario ya existe
-                const user = await usersModel.findOne({ seller_name: username })
-                if(user) return done(null, false, { message: "El usuario ya existe" })
-                
-                // Preparamos el nuevo usuario si pasa la anterior validacion
+
+                if (userExists) return done(null, false, { message: "El usuario ya existe" });
+
                 const newUser = {
-                    seller_name: username,
-                    email: email,
-                    code_list: code_list,
+                    email: username,
                     password: createHash(password),
-                    order: order,
-                    role: role,
-                    bearer_token: bearer_token
-                }
+                    firstName,
+                    lastName,
+                    role,
+                };
 
-                // Creamos el usuario y lo devolvemos
-                const result = await usersModel.create(newUser);
-                return done(null, result)
+                const userCreated = await authService.createUser(newUser)
 
-            } catch (error) {   
-                return done(error)
+
+                return done(null, userCreated);
+            } catch (error) {
+                return done(error, false);
             }
         }
     ))
 
 
-
     passport.use('login', new LocalStrategy(
         
         {
-            usernameField: 'seller_name'
+            usernameField: 'email',
+            passReqToCallback: true,
         },
-        async(username, password, done) => {
-            
+        async(req, username, password, done) => {
+
+            const { role = 'buyer' } = req.body // <-- Si no se pasa este parametro por defecto sera "buyer"
+
+            if (!username || !username) {
+                return done(null,false, "Faltan parametros en la peticion")
+            }
+
+            if(role !== "buyer" && role !== "admin"){
+                done(null, false, { message: " Rol invalido, debe ser 'buyer' o 'admin' " } )
+            }
+
             try {
+
+                const user = await authService.getUserByEmailAndRole(username, role)
                 
-                const user = await usersModel.findOne({ seller_name: username });
-                if(!user) return done(null, false);
-                if(!isValidHash(user, password)) return done(null, false);
+                if(!user) return done(null, false, { message: "Usuario no encontrado" });
+                if(!isValidHash(user, password)) return done(null, false, { message: "Contraseña incorrecta" });
 
                 // Si encuentra el user, y la contraseña coincide, llega a este punto
                 return done(null, user)

@@ -1,5 +1,5 @@
 
-# Endpoint   " /api/products/"
+# Endpoints   " /api/products/"
 
 ### Ruta que da acceso a la home page de la app. Accesible para todos, por ejemplo un visitante anonimo. Devuelve un mensaje de bienvenida
 GET http://127.0.0.1:8080/api/products
@@ -17,7 +17,7 @@ POST http://127.0.0.1:8080/api/products/newProduct
 
 
 
-# Endpoint   " /api/sessions"
+# Endpoints   " /api/sessions"
 
 
 ### Ruta para registrar un nuevo usuario.
@@ -34,4 +34,4 @@ GET http://127.0.0.1:8080/api/sessions/logout
 
 
 ### Ruta para acceder a los datos del usuario autenticado.
-GET http://127.0.0.1:8080/api/sessions/current
+GET http://127.0.0.1:8080/api/sessions/profile
