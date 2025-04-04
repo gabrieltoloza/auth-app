@@ -28,3 +28,29 @@ export const mockProduct = () => {
     }
 }
 
+
+export const generateMockUsers = (quantity) => {
+
+    let users = [];
+
+    for(let i = 0;i < quantity; i++) {
+        users.push(mockUser())
+    }
+
+    return users;
+
+}
+
+
+export const generaMockProducts = (quantity) => {
+
+    let products = [];
+
+    for(let i = 0;i < quantity; i++) {
+        products.push(mockProduct())
+    }
+
+    return products;
+
+}
+

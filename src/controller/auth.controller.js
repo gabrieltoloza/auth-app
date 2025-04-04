@@ -1,5 +1,5 @@
 import { UserDTO } from "../dto/user.dto.js";
-import { mockProduct, mockUser } from "../module/mock-data.js";
+import { generateMockUsers, mockProduct, mockUser } from "../module/mock-data.js";
 import { authService } from "../services/auth/index.js";
 import { PasswordResetService } from "../services/password-reset/index.js";
 import { ProductService } from "../services/products/index.js";
@@ -7,6 +7,8 @@ import { generateToken } from "../utils/jwt-token.js";
 
 
 export class AuthController {
+
+
 
     static async registerUser(req, res) {
         try {
@@ -23,6 +25,9 @@ export class AuthController {
             res.status(400).json({ message: "Internal Server Error"})
         }
     }
+
+
+
 
 
     static async loginUser(req, res) {
@@ -44,10 +49,16 @@ export class AuthController {
     }
 
 
+
+
+    // Logout
     static async logOut(req, res) {
         
         res.clearCookie('hashTomadorWeb').json({ message: "Logout succefully"}).status(200)
     }
+
+
+
 
 
 
@@ -68,6 +79,9 @@ export class AuthController {
     }
 
 
+
+
+
     static async resetPassword (req, res) {
 
         const { email } = req.body
@@ -84,6 +98,9 @@ export class AuthController {
             res.status(500).json({ status: false, error: error.message})
         }
     }
+
+
+
 
 
     static async updatePassword(req, res) {
@@ -110,46 +127,95 @@ export class AuthController {
     }
 
 
+
+
     // metodos Pre Entrega N°1
 
-    static async insertMockUsers (req, res) {
+    static async insertMockData (req, res) {
         
-        const { quantity } = req.body;
+        const { quantityUser, quantityProduct } = req.body;
 
-        if (!quantity || isNaN(quantity) || quantity <= 0) {
+        if ((!quantityUser || isNaN(quantityUser) || quantityUser <= 0) || (!quantityProduct || isNaN(quantityProduct) || quantityProduct <= 0)) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
+        // Aqui me haria falta typescript jeje
         const resultStats = {
             ok: 0,
-            error: 0
-        }
+            error: 0,
+            users: [],
+            products: [],
+        };
 
         try {
 
-            for(let i = 0;i < quantity; i++) {
-                const result = await authService.createUser(mockUser())
+            for(let i = 0;i < quantityUser; i++) {
+                const result = await authService.createUser(mockUser());
                 if(result instanceof Error) {
-                    resultStats.error+= 1
+                    resultStats.error++;
+                    resultStats.users.push({
+                        insertId: i,
+                        user: result,
+                        success: false,
+                        error: true,
+                    })
                 } else {
-                    resultStats.ok+= 1
+                    resultStats.ok++;
+                    resultStats.users.push({
+                        insertId: i,
+                        user: result,
+                        success: true,
+                        error: false
+                    })
                 }
             }
 
-            if(resultStats.ok < 1) return res.status(400).json({ status: false, error: 'No se pudo agregar ningun usuario'})
-                
-            return resultStats.ok === parseInt(quantity)
-                ? res.status(200).json({ status: true, result: `Se crearon ${resultStats.ok} usuarios`})
+            for(let i = 0;i < quantityProduct; i++) {
+                const result = await ProductService.createProduct(mockProduct())
+                if(result instanceof Error) {
+                    resultStats.error++;
+                    resultStats.products.push({
+                        insertId: i,
+                        user: result,
+                        success: false,
+                        error: true,
+                    })
+                } else {
+                    resultStats.ok++;
+                    resultStats.products.push({
+                        insertId: i,
+                        user: result,
+                        success: true,
+                        error: false
+                    })
+                }
+            }
+
+
+            if(resultStats.ok < 1) return res.status(400).json({ status: false, error: 'No se pudo agregar ningun usuario o produto'})
+
+
+            return resultStats.ok === (parseInt(quantityUser) + parseInt(quantityProduct))
+                ? res.status(200).json({
+                    status: true, 
+                    result: `Se crearon ${resultStats.users.length} usuarios y ${resultStats.products.length} productos.`,
+                    users: resultStats.users,
+                    product: resultStats.products
+                })
                 : res.status(200).json({ 
                     status: true, 
-                    result: `Se crearon ${resultStats.ok} usuarios, ${resultStats.error} no pudieron crearse`
+                    result: `Se crearon ${resultStats.users.length} usuarios y ${resultStats.products.length} productos, ${resultStats.error} registros no pudieron crearse`,
+                    users: resultStats.users,
+                    product: resultStats.products
                 })
 
-    
         } catch (error) {
             res.status(500).json({ status: false, error: error.message})
         }
     }
+
+
+
 
 
     static async getUsersMockWithDB (req, res) {
@@ -169,10 +235,12 @@ export class AuthController {
     }
 
 
+
+
+
     static async getMockUsers (req, res) {
 
         const { quantity } = req.body;
-        const allMockProducts = []
 
         if (!quantity || isNaN(quantity) || quantity <= 0) {
             return res.status(400).json({ message: "Missing required fields" });
@@ -180,11 +248,9 @@ export class AuthController {
 
         try {
 
-            for(let i = 0;i < quantity; i++) {
-                allMockProducts.push(mockUser())
-            }
+            const result = generateMockUsers(quantity)
             
-            res.status(200).json({ status: true, result: allMockProducts })
+            res.status(200).json({ status: true, result: result })
 
         } catch (error) {
             res.status(500).json({ status: false, error: error.message})

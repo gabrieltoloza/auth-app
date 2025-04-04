@@ -58,12 +58,14 @@ GET http://127.0.0.1:8082/api/sessions/profile
 
 
 ### Ruta para la primer entrega Modulo3
-POST http://localhost:8082/api/mocks/usersMock
+POST http://localhost:8082/api/mocks/dataMock
 Content-Type: application/json
 
 {
-  "quantity": 0
+  "quantityUser": 100,
+  "quantityProduct": 100
 }
+
 
 
 GET http://localhost:8082/api/mocks/get-users-with-db
@@ -79,5 +81,5 @@ GET http://localhost:8082/api/mocks/get-users-mock
 Content-Type: application/json
 
 {
-  "quantity": 10
+  "quantity": 100
 }
