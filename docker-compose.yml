@@ -1,0 +1,39 @@
+version: '3.8'
+
+services: 
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      - PORT=8080
+      - MONGO_URI=${MONGO_URI}
+      - SECRET_JWT=${SECRET_JWT}
+      - GOOGLE_EMAIL=alejandroalahi@gmail.com
+      - PASSWORD_GOOGLE_APP=${PASSWORD_GOOGLE_APP}
+      - TEST_VAR=probando-variable-de-dockercompose
+    depends_on:
+      - mongo
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    networks:
+      - app-coder-network
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-coder-network
+
+networks:
+  app-coder-network:
+    driver: bridge
+
+volumes:
+  mongo-data:

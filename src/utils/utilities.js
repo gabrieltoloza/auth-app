@@ -16,7 +16,6 @@ export const config = {
     MONGO_PASSWORD_RESET_COLLECTION: 'password-reset',
     MONGO_TICKET_COLLECTION: 'ticket',
 
-
     // .env
     MONGO_URI: process.env.MONGO_URI,
     PORT: process.env.PORT,

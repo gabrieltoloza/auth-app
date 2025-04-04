@@ -9,6 +9,7 @@ import { config } from './src/utils/utilities.js';
 import { corsMiddleware } from './src/middleware/cors.js';
 import DbConnection from './src/config/db.connection.js';
 import CartRouter from './src/routes/cart.routes.js'
+import MockRouter from './src/routes/mock.routes.js'
 
 
 
@@ -32,28 +33,22 @@ app.use('/api/products', ProductsRouter);
 app.use('/api/sessions', UserRouter);
 app.use('/api/carts', CartRouter);
 
+// Ruta del Primer entregable
+app.use('/api/mocks', MockRouter)
 
+
+
+// Conectar a la base de datos antes de iniciar el servidor
 DbConnection.getInstance()
+    .then(() => {
+        app.listen(config.PORT, () => {
+        console.log(process.env.TEST_VAR)
+        console.log(`Conexion a MongoDB exitosa. Puerto funcionando en el puerto http://localhost:${config.PORT}`)
+        });
+    })
+    .catch(err => {
+        console.error('Error al conectar a MongoDB:', err);
+    });
 
 
 
-
-app.listen(config.PORT, () => {
-    console.log(`Conexion a MongoDB exitosa. Puerto funcionando en el puerto http://localhost:${config.PORT}`)
-})
-
-
-
-
-
-
-
-
-// Conectando mongo para que este disponible en nuestra app.
-// mongoose.connect(config.MONGO_URI)
-//     .then(() => {
-//         app.listen(config.PORT, () => {
-//             console.log(`Conexion a MongoDB exitosa. Puerto funcionando en el puerto http://localhost:${config.PORT}`)
-//         })
-//     })
-//     .catch(err => console.error('Error al conectar a MongoDB, no se pudo levantar el servidor: ', err))

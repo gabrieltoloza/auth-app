@@ -24,7 +24,7 @@ export class PasswordResetRepository {
         try {
 
             const result = await this.dao.createPasswordReset(user);
-             await transport.sendMail({
+            await transport.sendMail({
                 from: process.env.GOOGLE_EMAIL,
                 to: result.email,
                 subject: 'Actualizar contraseña',
@@ -39,7 +39,7 @@ export class PasswordResetRepository {
                     path: dirname+'/public/img/logo_pick&log.png',
                     cid: 'picklog'
                 }]
-             })
+            })
              
              return result
 

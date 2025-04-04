@@ -5,6 +5,17 @@ import { handleCreateMongoError } from '../utils/handler.mongo.error.js'
 
 export class AdminDao {
 
+
+    static async getAdmins () {
+        try {
+            const result = await AdminModel.find()
+            return result;
+            
+        } catch (error) {
+            return error
+        }
+    }
+
     static async getByEmail (email) {
         try {
 
@@ -13,7 +24,6 @@ export class AdminDao {
             return result
 
         } catch (error) {
-            console.log(error)
             return error
         }
     }
@@ -26,7 +36,6 @@ export class AdminDao {
             return result
 
         } catch (error) {
-            console.log(error.message)
             return handleCreateMongoError(error)
         }
     }
@@ -45,7 +54,6 @@ export class AdminDao {
             return result
 
         } catch (error) {
-            console.error("Error al actualizar administrador:", error.message);
             return error
         }
     }

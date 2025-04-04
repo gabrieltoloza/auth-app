@@ -23,4 +23,5 @@ router.post('/reset-password', AuthController.resetPassword)
 router.post('/update-password', AuthController.updatePassword) // <-- solo para el buyer, ya que el admin se contempla como superusuario
 
 
+
 export default router;

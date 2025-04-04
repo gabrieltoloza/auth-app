@@ -5,6 +5,17 @@ import { handleCreateMongoError } from "../utils/handler.mongo.error.js";
 
 export class BuyerDao {
 
+
+    static async getBuyers () {
+        try {
+            const result = await BuyerModel.find()
+            return result;
+            
+        } catch (error) {
+            return error
+        }
+    }
+
     static async getAllBuyers () {
         try {
 
