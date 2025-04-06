@@ -3,6 +3,12 @@
 #### Clone el proyecto y ejecute:
 
 ```bash
+npm install
+```
+
+> Luego ejecute:
+
+```bash
 docker compose up -d
 ```
 
