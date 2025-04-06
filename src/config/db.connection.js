@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
-import { config } from "../utils/utilities.js";
-
+import mongoose from "mongoose"
+import {config} from "../utils/utilities.js"
 
 export default class DbConnection {
     static #instance
@@ -9,20 +8,17 @@ export default class DbConnection {
         mongoose.connect(config.MONGO_URI)
     }
 
-    static getInstance = async() => {
+    static getInstance = async () => {
         try {
-            
-            if(this.#instance) {
+            if (this.#instance) {
                 console.log("Ya se ha iniciado una instancia de MongoDB")
-                return this.#instance;
+                return this.#instance
             }
             this.#instance = new DbConnection()
             console.log("Conexion a MongoDB exitosa")
             return this.#instance
-
         } catch (error) {
             console.log("Error: ", error)
         }
     }
 }
-

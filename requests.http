@@ -62,18 +62,13 @@ POST http://localhost:8082/api/mocks/dataMock
 Content-Type: application/json
 
 {
-  "quantityUser": 100,
-  "quantityProduct": 100
+  "quantityUser": 20000,
+  "quantityProduct": 20000
 }
 
 
-
+###
 GET http://localhost:8082/api/mocks/get-users-with-db
-Content-Type: application/json
-
-{
-  "quantity": 10
-}
 
 
 ### 
