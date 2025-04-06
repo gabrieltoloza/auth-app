@@ -17,4 +17,4 @@ docker compose up -d
 
 ### IMPORTANTE:
 
-> Debera tener instalado docker desktop o los docker engine + compose V2
+> Debera tener instalado docker desktop o docker engine + compose V2
