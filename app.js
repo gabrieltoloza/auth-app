@@ -1,5 +1,4 @@
 import express from "express"
-import mongoose from "mongoose"
 import cookieParser from "cookie-parser"
 import passport from "passport"
 import compression from "compression"
@@ -11,6 +10,11 @@ import {corsMiddleware} from "./src/middleware/cors.js"
 import DbConnection from "./src/config/db.connection.js"
 import CartRouter from "./src/routes/cart.routes.js"
 import MockRouter from "./src/routes/mock.routes.js"
+import {customLogger} from "./src/utils/loggers.js"
+import {addLogger} from "./src/middleware/infoLogger.js"
+import swaggerJSDoc from "swagger-jsdoc"
+import swaggerUiExpress from "swagger-ui-express"
+import {swaggerOptions} from "./src/documentacion/swagger.js"
 
 const app = express()
 
@@ -19,11 +23,15 @@ app.use(compression())
 app.use(express.json())
 app.use(cookieParser())
 app.use(corsMiddleware())
+app.use(addLogger)
 app.use("/public", express.static("public"))
 
 // Inicializamos passport
 initializePassport()
 app.use(passport.initialize())
+
+const spec = swaggerJSDoc(swaggerOptions)
+app.use("/documentation", swaggerUiExpress.serve, swaggerUiExpress.setup(spec))
 
 // Definiedo el uso de los routers
 app.use("/api/products", ProductsRouter)
@@ -37,8 +45,7 @@ app.use("/api/mocks", MockRouter)
 DbConnection.getInstance()
     .then(() => {
         app.listen(config.PORT, () => {
-            console.log(process.env.TEST_VAR)
-            console.log(`Conexion a MongoDB exitosa. Puerto funcionando en el puerto http://localhost:${config.PORT}`)
+            customLogger.info(`Conexion a MongoDB exitosa. Puerto funcionando en el puerto http://localhost:${config.PORT}`)
         })
     })
     .catch(err => {

@@ -21,14 +21,13 @@ POST http://127.0.0.1:8080/api/products/newProduct
 
 
 ### Ruta para registrar un nuevo usuario.
-POST http://127.0.0.1:8082/api/sessions/register
+POST http://127.0.0.1:8080/api/sessions/register
 Content-Type: application/json
 
 {
   "firstName": "PickLog",
   "lastName": "Administracion",
   "email": "usuario@admin.com",
-  "password": "123456",
   "role": "admin"
 }
 
@@ -45,7 +44,7 @@ Content-Type: application/json
 
 
 ### Ruta para desloguearse de la session y eliminar el jwt
-GET http://127.0.0.1:8082/api/sessions/logout
+GET http://127.0.0.1:8080/api/sessions/logout
 
 
 

@@ -1,0 +1,377 @@
+tags:
+    - name: Autenticación
+      description: |
+          Endpoints relacionados con la autenticación y gestión de usuarios.
+
+          **Flujo de autorización**:
+          1. El middleware `passportCall("jwt")` verifica primero la autenticación del usuario a través del token JWT.
+          2. Si la autenticación es exitosa, el middleware `authorization(["roles"])` verifica que el usuario tenga los roles necesarios.
+          3. Si el usuario no tiene los permisos necesarios, se devuelve un error 403 (Forbidden).
+
+paths:
+    /api/sessions/register:
+        post:
+            summary: Registra un nuevo usuario en el sistema
+            tags:
+                - Autenticación
+            security:
+                - cookieAuth: []
+            description: |
+                Endpoint para registrar un nuevo usuario en el sistema.
+                **Autorización**: Sólo usuarios con rol 'admin' pueden acceder a esta ruta.
+                El middleware de autorización verifica que el usuario tenga los permisos necesarios.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/requestBodies/registerUser"
+            responses:
+                "200":
+                    description: Usuario registrado correctamente
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+                "400":
+                    description: Error en el registro del usuario
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+                "403":
+                    $ref: "#/components/responses/Forbidden"
+
+    /api/sessions/login:
+        post:
+            summary: Inicia sesión con credenciales existentes
+            tags:
+                - Autenticación
+            description: |
+                Endpoint público para iniciar sesión.
+                No requiere autorización previa.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/requestBodies/loginUser"
+            responses:
+                "200":
+                    description: Inicio de sesión correcto
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+                "400":
+                    description: Credenciales incorrectas
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+    /api/sessions/logout:
+        get:
+            summary: Cierra la sesión del usuario actual
+            tags:
+                - Autenticación
+            description: |
+                Endpoint para cerrar la sesión del usuario.
+                No requiere autorización específica.
+            responses:
+                "200":
+                    description: Sesión cerrada correctamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                example:
+                                    message: "Logout succefully"
+
+    /api/sessions/profile:
+        get:
+            summary: Obtiene los datos del perfil del usuario autenticado
+            tags:
+                - Autenticación
+            security:
+                - cookieAuth: []
+            description: |
+                Endpoint para obtener los datos del perfil del usuario autenticado.
+                **Autenticación**: Requiere token JWT válido.
+                No tiene restricciones adicionales de roles.
+            responses:
+                "200":
+                    description: Perfil obtenido correctamente
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ProfileResponse"
+                "400":
+                    description: Error al obtener el perfil
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                "401":
+                    $ref: "#/components/responses/Unauthorized"
+
+    /api/sessions/reset-password:
+        post:
+            summary: Solicita un token para restablecer contraseña
+            tags:
+                - Autenticación
+            description: |
+                Endpoint para solicitar el restablecimiento de contraseña.
+                No requiere autorización previa.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/requestBodies/resetPasswordRequest"
+            responses:
+                "200":
+                    description: Token enviado correctamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    result:
+                                        type: object
+                "400":
+                    description: Error al procesar la solicitud
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+    /api/sessions/update-password:
+        post:
+            summary: Actualiza la contraseña usando el token recibido
+            tags:
+                - Autenticación
+            description: |
+                Endpoint para actualizar la contraseña mediante el token recibido.
+                Diseñado principalmente para usuarios con rol 'buyer', ya que los admins
+                se consideran superusuarios con otras vías de gestión.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/requestBodies/updatePasswordRequest"
+            responses:
+                "200":
+                    description: Contraseña actualizada correctamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: boolean
+                                    result:
+                                        type: object
+                "400":
+                    description: Error al actualizar la contraseña
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+    securitySchemes:
+        cookieAuth:
+            type: apiKey
+            in: cookie
+            name: hashTomadorWeb
+
+    # Esquema para explicar el middleware de autorización
+    schemas:
+        AuthorizationMiddleware:
+            type: object
+            description: |
+                Middleware que verifica que el usuario tenga el rol adecuado para acceder a una ruta.
+                Este middleware se ejecuta después de la autenticación JWT y verifica que el rol del usuario
+                coincida con los roles permitidos para la ruta.
+            properties:
+                requiredRoles:
+                    type: array
+                    description: Lista de roles permitidos para acceder a la ruta
+                    items:
+                        type: string
+                        enum: [admin, buyer]
+                implementation:
+                    type: string
+                    description: "Implementado en: /src/middleware/authorization.js"
+
+        AuthResponse:
+            type: object
+            properties:
+                status:
+                    type: boolean
+                    description: Indica si la operación fue exitosa
+                message:
+                    type: string
+                    description: Mensaje descriptivo del resultado
+                info:
+                    type: string
+                    description: Información adicional sobre el usuario
+            example:
+                status: true
+                message: "Login OK"
+                info: "User authenticated"
+
+        ErrorResponse:
+            type: object
+            properties:
+                status:
+                    type: boolean
+                    description: Indica si la operación falló
+                message:
+                    type: string
+                    description: Mensaje de error
+            example:
+                status: false
+                message: "Login failed"
+
+        ProfileResponse:
+            type: object
+            properties:
+                status:
+                    type: boolean
+                    description: Indica si la operación fue exitosa
+                payload:
+                    type: object
+                    properties:
+                        fullName:
+                            type: string
+                            description: Nombre completo del usuario
+                        email:
+                            type: string
+                            description: Correo electrónico del usuario
+            example:
+                status: true
+                payload:
+                    fullName: "Gabriel Toloza"
+                    email: "gabriel@gmail.com"
+
+    responses:
+        Unauthorized:
+            description: Usuario no autenticado o token inválido
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            status:
+                                type: boolean
+                                example: false
+                            message:
+                                type: string
+                                example: "No autorizado"
+
+        Forbidden:
+            description: Usuario no tiene permisos para acceder a esta ruta
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            status:
+                                type: boolean
+                                example: false
+                            message:
+                                type: string
+                                example: "No tiene permisos suficientes para acceder"
+
+    requestBodies:
+        registerUser:
+            type: object
+            properties:
+                firstName:
+                    type: string
+                    description: Nombre del usuario
+                lastName:
+                    type: string
+                    description: Apellido del usuario
+                email:
+                    type: string
+                    description: Correo electrónico del usuario
+                password:
+                    type: string
+                    description: Contraseña del usuario
+                role:
+                    type: string
+                    description: Rol del usuario (buyer o admin)
+                    default: buyer
+            required:
+                - firstName
+                - lastName
+                - email
+                - password
+            example:
+                firstName: "Gabriel"
+                lastName: "Toloza"
+                email: "gabriel@gmail.com"
+                password: "123456"
+                role: "buyer"
+
+        loginUser:
+            type: object
+            properties:
+                email:
+                    type: string
+                    description: Correo electrónico del usuario
+                password:
+                    type: string
+                    description: Contraseña del usuario
+                role:
+                    type: string
+                    description: Rol del usuario (buyer o admin)
+                    default: buyer
+            required:
+                - email
+                - password
+            example:
+                email: "gabriel@gmail.com"
+                password: "123456"
+                role: "buyer"
+
+        resetPasswordRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    description: Correo electrónico del usuario
+            required:
+                - email
+            example:
+                email: "gabriel@gmail.com"
+
+        updatePasswordRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    description: Correo electrónico del usuario
+                resetToken:
+                    type: string
+                    description: Token de restablecimiento recibido por correo
+                password:
+                    type: string
+                    description: Nueva contraseña
+            required:
+                - email
+                - resetToken
+                - password
+            example:
+                email: "gabriel@gmail.com"
+                resetToken: "ab123cd456ef789"
+                password: "nuevaContraseña123"
