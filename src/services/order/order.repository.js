@@ -128,6 +128,12 @@ export class OrderRepository {
     async resolveOrder (id, status) {
         try {
 
+
+            const validStatuses = ["confirmed", "cancelled", "pending"]
+            if (!validStatuses.includes(status)) {
+                return new Error(`Status inválido. Debe ser uno de: ${validStatuses.join(", ")}`)
+            }
+
             let finalPrice = 0
             let purchaseItems = []
             let notPurchasedItems = []

@@ -37,6 +37,7 @@ export class AuthController {
         res.clearCookie("hashTomadorWeb").json({message: "Logout succefully"}).status(200)
     }
 
+    
     static async getUserData(req, res) {
         try {
             if (!req.user) return res.status(400).json({status: false, message: req.info})

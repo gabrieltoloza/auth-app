@@ -49,19 +49,21 @@ const initializePassport = () => {
         async(req, username, password, done ) => {
 
             
-            const { firstName, lastName, role = 'buyer' } = req.body; // <-- Si no se pasa este parametro por defecto sera "buyer"
+            const { firstName, lastName, role } = req.body; // <-- Si no se pasa este parametro por defecto sera "buyer"
+      
+            const [ arrayRole ] = role;
 
             if (!firstName || !lastName || !username || !password) {
                 return done(null, false, { message: "Faltan parametros en la peticion" });
             }
 
-            if (role !== "buyer" && role !== 'admin') {
+            if (arrayRole !== "buyer" && arrayRole !== 'admin') {
                 return done(null, false, { message: " Rol invalido, debe ser 'buyer' o 'admin' " });
             }
 
             try {
 
-                const userExists = await authService.getUserByEmailAndRole(username, role)
+                const userExists = await authService.getUserByEmailAndRole(username, arrayRole)
                 
 
                 if (userExists) return done(null, false, { message: "El usuario ya existe" });
@@ -71,7 +73,7 @@ const initializePassport = () => {
                     password: createHash(password),
                     firstName,
                     lastName,
-                    role,
+                    role: [arrayRole],
                 };
 
                 const userCreated = await authService.createUser(newUser)
@@ -100,7 +102,7 @@ const initializePassport = () => {
             }
 
             if(role !== "buyer" && role !== "admin"){
-                done(null, false, { message: " Rol invalido, debe ser 'buyer' o 'admin' " } )
+                return done(null, false, { message: " Rol invalido, debe ser 'buyer' o 'admin' " } )
             }
 
             try {

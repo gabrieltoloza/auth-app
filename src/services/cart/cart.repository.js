@@ -87,7 +87,9 @@ export class CartRepository {
                     return new Error("Id carrito invalido o cantidad 0");
                 }
                 const checkProduct = await ProductService.getProductById(productId)
-                if(!checkProduct) return new Error("No se encontro el producto que intenta agregar al carrito")
+                if(!checkProduct || checkProduct instanceof Error ) {
+                    return new Error("No se encontro el producto que intenta agregar al carrito")
+                }
 
                 totalAmount += checkProduct.price * product.quantity
             }

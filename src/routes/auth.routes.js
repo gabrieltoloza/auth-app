@@ -5,7 +5,7 @@ import {AuthController} from "../controller/auth.controller.js"
 
 const router = Router()
 
-router.post("/register", passportCall("register"), authorization(["admin"]), AuthController.registerUser)
+router.post("/register", passportCall('jwt'), authorization(["admin"]), passportCall("register"), AuthController.registerUser)
 
 router.post("/login", passportCall("login"), AuthController.loginUser)
 

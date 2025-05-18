@@ -5,3 +5,4 @@ npm-debug.log
 .gitignore
 docker-compose.yml
 Dockerfile
+package-lock.json

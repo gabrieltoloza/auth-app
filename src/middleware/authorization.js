@@ -4,8 +4,8 @@ export const authorization = (role) => {
             // Le dejo la validacion al controlador, el passportconfig me setea la info que debe llegar
             return res.status(401).json({ status: false, message: "No autorizado" });
         }
-
-        const userRole = req.user.role;
+        console.log(req.user)
+        const userRole = Array.isArray(req.user.role) ? req.user.role[0] : req.user.role;
         const middlewareRoles = Array.isArray(role) ? role : [role];
 
         const hasRole = middlewareRoles.includes(userRole);
