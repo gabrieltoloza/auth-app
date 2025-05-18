@@ -23,7 +23,7 @@ version: '3.8'
 
 services: 
   app:
-    image: gabuuu2025/entregafinalm3:latest
+    image: gabuuu2025/entregafinal3:latest
     restart: always
     ports:
       - "8080:8080"
@@ -52,9 +52,13 @@ docker run -p 8080:8080 --env-file .env gabuuu2025/entregafinal3:latest
 
 Se han desarrollado tests funcionales para todos los endpoints del router de carritos, cubriendo operaciones de listado, creación, actualización, compra y eliminación de carritos.
 
-- Para ejecutar los tests:
+- Para ejecutar los tests debe hacerlos dentro del contenedor:
 ```bash
-npm test
+docker exec -it probando_proyecto-app-1 npm test
+```
+- O quizas le pida ejecutarlo de la siguiente manera segun su sistema operativo
+```bash
+winpty docker exec -it probando_proyecto-app-1 npm test
 ```
 
 
